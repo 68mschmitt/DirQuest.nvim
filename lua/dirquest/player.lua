@@ -58,18 +58,22 @@ function M.can_move_to(x, y, world_width, world_height, world, direction)
     for i = 1, #sprite do
       local sprite_line = sprite[i]
       for j = 1, #sprite_line do
-        local check_x = x + j - 1
-        local check_y = y + i - 1
+        local sprite_char = sprite_line:sub(j, j)
         
-        if check_y >= 1 and check_y <= world_height and check_x >= 1 and check_x <= world_width then
-          local cell = world.grid[check_y][check_x]
+        if sprite_char ~= " " then
+          local check_x = x + j - 1
+          local check_y = y + i - 1
           
-          if cell == "=" then
-            if direction == "down" then
+          if check_y >= 1 and check_y <= world_height and check_x >= 1 and check_x <= world_width then
+            local cell = world.grid[check_y][check_x]
+            
+            if cell == "=" then
+              if direction == "down" then
+                return false
+              end
+            elseif cell == "|" or cell == "_" or cell == "-" then
               return false
             end
-          elseif cell == "|" or cell == "_" or cell == "-" then
-            return false
           end
         end
       end
