@@ -67,7 +67,7 @@ function M.layout_locations(world)
       end
     end
     
-    local art = ascii_art.get_directory_art(dir.name, size)
+    local art, entrance_offset = ascii_art.get_directory_art(dir.name, size)
     local location = {
       name = dir.name,
       path = dir.path,
@@ -76,7 +76,11 @@ function M.layout_locations(world)
       width = #art[1],
       height = #art,
       art = art,
-      is_directory = true
+      is_directory = true,
+      entrance = entrance_offset and {
+        x = x_offset + entrance_offset.x - 1,
+        y = world.ground_level - #art + entrance_offset.y - 1
+      } or nil
     }
     
     M.draw_location(world, location)
@@ -172,6 +176,32 @@ function M.get_object_at(world, x, y)
   end
   
   return nil
+end
+
+function M.get_nearby_interactive(world, x, y, range)
+  range = range or 2
+  
+  for _, location in ipairs(world.locations) do
+    if location.entrance then
+      local dx = math.abs(x - location.entrance.x)
+      local dy = math.abs(y - location.entrance.y)
+      if dx <= range and dy <= range then
+        return location, "entrance"
+      end
+    end
+  end
+  
+  for _, obj in ipairs(world.objects) do
+    local obj_center_x = obj.x + math.floor(#obj.sprite[1] / 2)
+    local obj_center_y = obj.y
+    local dx = math.abs(x - obj_center_x)
+    local dy = math.abs(y - obj_center_y)
+    if dx <= range and dy <= range then
+      return obj, "file"
+    end
+  end
+  
+  return nil, nil
 end
 
 return M

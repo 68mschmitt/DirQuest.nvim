@@ -117,18 +117,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Files limited to 10 visible at once
 - Objects positioned with spacing to avoid overlap
 
+## [0.4.1] - 2025-10-16
+
+### Added
+- Coordinate-based collision system using AABB (Axis-Aligned Bounding Box)
+- Collision rectangles tracking in world structure
+- `collision_rects` array for efficient collision detection
+- Rectangle overlap detection algorithm
+- Ground collision (blocks downward movement only)
+- Structure collision (blocks all directions)
+
+### Changed
+- Replaced ASCII symbol collision with coordinate-based system
+- Player collision now uses rectangle overlap detection
+- Visual grid separated from collision logic
+- Improved performance with O(n) collision checks
+
+### Technical Details
+- `lua/dirquest/player.lua` - Added `rects_overlap()` function
+- `lua/dirquest/world.lua` - Added collision rectangle registration
+- Collision detection no longer checks ASCII characters
+- Player sprite dimensions treated as bounding box (3×2)
+
+## [0.5.0] - 2025-10-16
+
+### Added
+- Phase 5 implementation - Collision Detection and Interaction
+- Entrance points for all directory structures
+- `get_nearby_interactive()` function for proximity detection
+- Dynamic interaction prompts in HUD
+- Context-aware hints when near objects
+- 2-tile detection range for interactions
+- Support for both entrance and file proximity detection
+
+### Changed
+- Updated `ascii_art.lua` with entrance coordinate tracking
+- Updated `world.lua` with proximity detection system
+- Updated `renderer.lua` with dynamic HUD hints
+- Updated `init.lua` to use proximity-based interaction
+- Version bumped to 0.5.0
+- Enter key now works from nearby positions (within 2 tiles)
+
+### Improved
+- Interaction UX - no longer requires exact positioning
+- HUD shows contextual prompts: "<CR> to enter [name]" or "<CR> to open [name]"
+- Prompts appear/disappear based on player position
+- More intuitive and forgiving interaction system
+
+### Technical Details
+- Entrance positions calculated relative to structure placement
+- Manhattan distance used for proximity checks
+- Small template entrance: (3, 3)
+- Medium template entrance: (5, 4)
+- Large template entrance: (7, 5)
+- Detection range: 2 tiles (configurable)
+
 ## [Unreleased]
 
-### Phase 5 - Coming Next
-- Collision detection with directory structures
-- Entrance/door system for directories
-- Proper hitboxes for objects
-- Walk-through vs solid objects
+### Phase 6 - Coming Next
+- Multiple directory art templates for variety
+- Enhanced ASCII art with visual details
+- File type-specific sprites with better icons
+- Syntax highlighting for world elements
+- Improved HUD layout and design
+- Visual polish and decorative elements
 
 ### Future Phases
-- Player sprite and movement (Phase 3)
-- World generation with ASCII art (Phase 4)
-- Collision detection and interaction (Phase 5)
 - Visual polish and enhanced art (Phase 6)
 - Configuration and customization (Phase 7)
 - Error handling and edge cases (Phase 8)

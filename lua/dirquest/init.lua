@@ -4,7 +4,7 @@ local renderer = require('dirquest.renderer')
 local game = require('dirquest.game')
 local player = require('dirquest.player')
 
-M.version = "0.4.0"
+M.version = "0.5.0"
 
 function M.start(path)
   if game.state.buffer and vim.api.nvim_buf_is_valid(game.state.buffer) then
@@ -66,7 +66,8 @@ function M.setup_keymaps(buffer)
     local px, py = player.get_position()
     
     if renderer.current_world then
-      local obj = require('dirquest.world').get_object_at(renderer.current_world, px, py)
+      local obj, obj_type = require('dirquest.world').get_nearby_interactive(renderer.current_world, px, py, 2)
+      
       if obj then
         if obj.is_directory then
           game.navigate_into(obj)

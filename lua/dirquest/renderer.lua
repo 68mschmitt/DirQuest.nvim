@@ -66,8 +66,18 @@ function M.render_world(buffer)
     table.insert(lines, line)
   end
   
+  local px, py = player.get_position()
+  local nearby_obj, obj_type = world.get_nearby_interactive(M.current_world, px, py, 2)
+  
+  local interaction_hint = ""
+  if nearby_obj and obj_type == "entrance" then
+    interaction_hint = " | <CR> to enter " .. nearby_obj.name
+  elseif nearby_obj and obj_type == "file" then
+    interaction_hint = " | <CR> to open " .. nearby_obj.name
+  end
+  
   table.insert(lines, "")
-  table.insert(lines, "  Controls: hjkl = move | <CR> = interact | - = parent | q = quit")
+  table.insert(lines, "  Controls: hjkl = move" .. interaction_hint .. " | - = parent | q = quit")
 
   vim.api.nvim_buf_set_option(buffer, 'modifiable', true)
   vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
@@ -114,7 +124,7 @@ function M.render_welcome(buffer)
     "",
     "  ╔══════════════════════════════════════════════════════════╗",
     "  ║                                                          ║",
-    "  ║                      DirQuest v0.4.0                     ║",
+    "  ║                      DirQuest v0.5.0                     ║",
     "  ║                                                          ║",
     "  ║            Navigate your filesystem as a game            ║",
     "  ║                                                          ║",
@@ -130,7 +140,7 @@ function M.render_welcome(buffer)
     "    <CR>       - Interact with directories/files",
     "    q / <Esc>  - Quit",
     "",
-    "  Phase 4: Simple World Generation",
+    "  Phase 5: Collision Detection and Interaction",
     "",
   }
 

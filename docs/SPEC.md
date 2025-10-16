@@ -453,35 +453,41 @@ lua/dirquest/input.lua
 
 ---
 
-## Phase 6: Enhanced ASCII Art and Visual Polish
+## Phase 6: Top-Down View Redesign
 
 ### Goal
-Replace simple boxes with varied, attractive ASCII art and add visual improvements.
+**MAJOR REDESIGN**: Transform from side-scroller to top-down exploration game with single-character player sprite and full-buffer world.
 
 ### New Functionality
-- Multiple directory art templates
-- Size-based template selection (small/medium/large)
-- Hidden directory special styling
-- File type-specific sprites
-- Syntax highlighting for different elements
-- HUD with path and controls
-- Sky and environment details
+- **Top-down perspective** (bird's-eye view instead of side view)
+- **Buffer border system** - playable area with borders for HUD/status
+- **Single-character player sprite** - 🚶 emoji (with cursor fallback)
+- **Full-buffer world generation** - objects distributed throughout entire playable area
+- **Top-down directory boxes** - rectangular structures with borders (╔═╗ style)
+- **Single-character file sprites** - emoji icons (📄, 📜, 🐍, etc.)
+- **Standardized interaction zones** - 1 tile radius for all interactions
+- **Border collision** - cannot move outside playable area
+- **No ground/gravity** - free movement in all directions
 
 ### Files to Modify
 ```
-lua/dirquest/ascii_art.lua
-lua/dirquest/renderer.lua
-lua/dirquest/world.lua
+lua/dirquest/player.lua        - Single char sprite, simplified collision
+lua/dirquest/ascii_art.lua     - Top-down box templates, emoji sprites
+lua/dirquest/world.lua         - Full-buffer layout, border system
+lua/dirquest/renderer.lua      - Border rendering, new layout
 ```
 
 ### Implementation Tasks
-1. Create multiple directory art templates (small building, large castle, cave)
-2. Implement template selection based on directory size
-3. Create file type sprite mapping
-4. Add syntax highlighting groups
-5. Design and implement HUD layout
-6. Add decorative elements (clouds, grass, etc.)
-7. Improve ground rendering with patterns
+1. **Define border system** - Calculate playable area from buffer dimensions
+2. **Redesign player sprite** - Change to single character (🚶 or ●)
+3. **Create top-down directory templates** - Box-style with ╔═╗ borders
+4. **Update file sprites** - Single emoji characters for each file type
+5. **Rewrite world layout** - Distribute objects throughout playable area (not just bottom)
+6. **Add border collision** - Prevent movement outside playable bounds
+7. **Remove ground system** - No more ground level or gravity
+8. **Standardize entrances** - Bottom-center of each box, 1-tile radius
+9. **Update collision detection** - Work with 1x1 player and new layout
+10. **Add border rendering** - Draw HUD at top, status at bottom
 
 ### Manual Test Procedures
 
@@ -523,42 +529,61 @@ lua/dirquest/world.lua
 2. Run `:DirQuest`
 3. **Expected**: Files have default/generic sprite
 
-#### Test 6.8: HUD Display
+#### Test 6.8: Top-Down View
 1. Run `:DirQuest`
-2. **Expected**: HUD bar at top of buffer
-3. **Expected**: Shows "DirQuest" title
-4. **Expected**: Shows current full path
-5. **Expected**: Shows help hint ("? for help")
+2. **Expected**: No ground line visible
+3. **Expected**: Directory boxes distributed throughout buffer
+4. **Expected**: Top-down perspective, not side view
 
-#### Test 6.9: Syntax Highlighting - Player
+#### Test 6.9: Buffer Borders
 1. Run `:DirQuest`
-2. **Expected**: Player sprite has distinct color (e.g., gold)
-3. **Expected**: Player stands out visually
+2. **Expected**: HUD visible at top (3 lines)
+3. **Expected**: Status line at bottom (2 lines)
+4. **Expected**: Cannot move player into border areas
+5. **Expected**: Playable area clearly defined
 
-#### Test 6.10: Syntax Highlighting - Locations
+#### Test 6.10: Single Character Player
 1. Run `:DirQuest`
-2. **Expected**: Directory structures have consistent color
-3. **Expected**: Different from player and files
+2. **Expected**: Player is single emoji character (🚶)
+3. **Expected**: Player moves 1 tile at a time
+4. **Expected**: No multi-line sprite artifacts
 
-#### Test 6.11: Syntax Highlighting - Ground
-1. Run `:DirQuest`
-2. **Expected**: Ground has earth-tone color
-3. **Expected**: Visually separates from structures
+#### Test 6.11: Directory Box Style
+1. Run `:DirQuest` in directory with multiple subdirectories
+2. **Expected**: Directories rendered as boxes with ╔═╗ style borders
+3. **Expected**: Names embedded in boxes
+4. **Expected**: Entrances at bottom-center
 
-#### Test 6.12: Varied Directory Art
-1. Navigate to directory with 3 subdirectories of different sizes
+#### Test 6.12: Emoji File Sprites
+1. Navigate to directory with multiple file types
 2. Run `:DirQuest`
-3. **Expected**: Different art styles for different sized directories
-4. **Expected**: Visual variety in the world
+3. **Expected**: Files show as single emoji characters
+4. **Expected**: 📜 for .lua, 📄 for .txt, 🐍 for .py, etc.
+
+#### Test 6.13: Full Buffer Distribution
+1. Run `:DirQuest` in directory with many items
+2. **Expected**: Objects spread throughout entire playable area
+3. **Expected**: Not clustered at bottom
+4. **Expected**: Good use of vertical space
+
+#### Test 6.14: Standardized Interactions
+1. Move player near directory entrance
+2. **Expected**: Prompt appears within 1 tile
+3. Move player near file
+4. **Expected**: Prompt appears within 1 tile
+5. **Expected**: Consistent interaction radius for all objects
 
 ### Success Criteria
-- [ ] Multiple art templates implemented
-- [ ] Template selection works correctly
-- [ ] File type sprites display correctly
-- [ ] All syntax highlighting applied
-- [ ] HUD displays properly
-- [ ] Visual appeal significantly improved
-- [ ] World feels cohesive and polished
+- [ ] Top-down perspective fully implemented
+- [ ] Buffer border system working (HUD + status + playable area)
+- [ ] Single-character player sprite (emoji or cursor)
+- [ ] Objects distributed throughout entire playable area
+- [ ] Top-down directory boxes with ╔═╗ style
+- [ ] Single-character emoji file sprites
+- [ ] Border collision prevents leaving playable area
+- [ ] No ground/gravity system (removed)
+- [ ] Standardized 1-tile interaction radius
+- [ ] All previous functionality still works (navigation, interaction, etc.)
 
 ---
 

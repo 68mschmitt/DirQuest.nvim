@@ -2,27 +2,36 @@ local M = {}
 
 M.directory_templates = {
   small = {
-    "  ___  ",
-    " |   | ",
-    " |   | ",
-    " |___| ",
+    art = {
+      "  ___  ",
+      " |   | ",
+      " |   | ",
+      " |___| ",
+    },
+    entrance = { x = 3, y = 3 }
   },
   
   medium = {
-    "   _____   ",
-    "  |     |  ",
-    "  |     |  ",
-    "  |     |  ",
-    "  |_____|  ",
+    art = {
+      "   _____   ",
+      "  |     |  ",
+      "  |     |  ",
+      "  |     |  ",
+      "  |_____|  ",
+    },
+    entrance = { x = 5, y = 4 }
   },
   
   large = {
-    "    _______    ",
-    "   |       |   ",
-    "   |       |   ",
-    "   |       |   ",
-    "   |       |   ",
-    "   |_______|   ",
+    art = {
+      "    _______    ",
+      "   |       |   ",
+      "   |       |   ",
+      "   |       |   ",
+      "   |       |   ",
+      "   |_______|   ",
+    },
+    entrance = { x = 7, y = 5 }
   }
 }
 
@@ -47,14 +56,14 @@ function M.get_directory_art(name, size)
   end
   
   local art = {}
-  for i, line in ipairs(template) do
+  for i, line in ipairs(template.art) do
     table.insert(art, line)
   end
   
   local name_line = math.floor(#art / 2) + 1
   art = M.embed_text(art, name, name_line)
   
-  return art
+  return art, template.entrance
 end
 
 function M.embed_text(art, text, line_num)

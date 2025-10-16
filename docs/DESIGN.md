@@ -1,15 +1,37 @@
 # DirQuest.nvim - Design Document
 
 ## Overview
-DirQuest is a Neovim plugin that transforms file system navigation into an open-world side-scroller game experience. Users explore their directory structure as an ASCII-rendered world where directories become locations and files become interactive objects.
+DirQuest is a Neovim plugin that transforms file system navigation into an open-world top-down exploration game. Users explore their directory structure as an ASCII-rendered world where directories become locations and files become interactive objects.
 
 ## Core Concept
 - **Medium**: Neovim buffer with ASCII art rendering
+- **View**: Top-down perspective (bird's-eye view)
 - **Navigation**: Standard Vim cursor movement (`h`, `j`, `k`, `l`)
-- **Player**: ASCII sprite that represents the cursor position
-- **World**: Procedurally rendered ASCII art representing directories
+- **Player**: Single character emoji sprite (🚶 by default, cursor as fallback)
+- **World**: Procedurally rendered ASCII art filling the entire buffer space
+- **Border**: Buffer defines internal border as navigable play area
 - **Interaction**: Enter key to open directories or files
 - **Technology**: 100% Lua, zero external dependencies
+
+## Visual Paradigm Shift
+
+**Previous Design (Phases 1-5)**: Side-scroller with ground
+**New Design (Phase 6+)**: Top-down exploration
+
+```
+Before (Side View):              After (Top View):
+                                 ┌─────────────────┐
+     ___    _____                │ ╔═════════════╗ │
+    |   |  |     |               │ ║   📁 src    ║ │
+    | A |  |  B  |    [F]        │ ║             ║ │
+    |___|  |_____|               │ ╚═════════════╝ │
+  ==================             │                 │
+      ^                          │      🚶         │
+    player                       │   (player)      │
+                                 │                 │
+                                 │  📄 main.lua    │
+                                 └─────────────────┘
+```
 
 ## Architecture
 
@@ -42,9 +64,11 @@ dirquest.nvim/
   player = {
     x = 10,                                -- Player X position in buffer
     y = 5,                                 -- Player Y position in buffer
-    sprite = { "^", "|", "/" }             -- Player ASCII sprite (multi-line)
+    sprite = "🚶"                          -- Player single-char sprite (emoji)
   },
   world = {
+    border = { left = 2, right = 2,        -- Buffer border dimensions
+               top = 3, bottom = 2 },
     locations = {},                        -- Table of directory locations
     objects = {},                          -- Table of file objects
     layout = {}                            -- 2D array of the rendered world
@@ -79,22 +103,53 @@ dirquest.nvim/
 - `swapfile = false`
 - `modifiable = false` (except during rendering)
 
+**Buffer Layout**:
+```
+┌────────────────────────────────┐ ← Top border (line 1-3)
+│  📁 /current/directory         │ ← HUD area
+│  Controls: hjkl=move, <CR>=...│
+├────────────────────────────────┤ ← Border line
+│                                │
+│    ╔═══════╗      📄 file.lua │
+│    ║  src  ║                  │ ← Playable area
+│    ╚═══════╝      🚶          │   (fills entire buffer)
+│                                │
+├────────────────────────────────┤ ← Bottom border
+│  Status info                   │
+└────────────────────────────────┘
+```
+
 #### 2.3 World Generator (`world.lua`)
 **Purpose**: Generate ASCII world from directory structure
 
-**Location Object**:
+**Location Object (Top-Down)**:
 ```lua
 {
   type = "directory",
   name = "src",
   path = "/home/user/project/src",
-  x = 20,                      -- Start X position
-  y = 10,                      -- Start Y position
-  width = 30,                  -- Width of the location
-  height = 15,                 -- Height of the location
-  art = {},                    -- ASCII art lines
-  entrance = { x = 25, y = 24 }, -- Entrance coordinates (future)
+  x = 20,                      -- Center X position in playable area
+  y = 10,                      -- Center Y position in playable area
+  width = 10,                  -- Width of directory box
+  height = 5,                  -- Height of directory box
+  art = {},                    -- ASCII art lines (box with name)
+  entrance = { x = 20, y = 14 }, -- Entrance at bottom center
+  interaction_radius = 1,      -- Player can interact within 1 tile
   is_directory = true          -- Directory flag
+}
+```
+
+**File Object (Top-Down)**:
+```lua
+{
+  type = "file",
+  name = "main.lua",
+  path = "/home/user/project/main.lua",
+  x = 45,                      -- Center X position
+  y = 18,                      -- Center Y position
+  sprite = "📄",               -- Single character (emoji or ASCII)
+  interaction_radius = 1,      -- Player can interact within 1 tile
+  file_type = "lua"            -- Extension-based type
 }
 ```
 
@@ -103,9 +158,9 @@ dirquest.nvim/
 {
   x = 20,                      -- Start X position
   y = 10,                      -- Start Y position
-  width = 30,                  -- Width of collision area
-  height = 15,                 -- Height of collision area
-  type = "structure",          -- "structure" or "ground"
+  width = 10,                  -- Width of collision area
+  height = 5,                  -- Height of collision area
+  type = "structure",          -- "structure", "border", or "file"
   object = location            -- Reference to location/object (optional)
 }
 ```
@@ -143,13 +198,22 @@ dirquest.nvim/
 #### 2.4 Player Controller (`player.lua`)
 **Purpose**: Handle player sprite and movement logic
 
-**Sprite Design**:
+**Sprite Design (New - Phase 6+)**:
 ```lua
--- Default player sprite (3x2)
-{
-  " o ",
-  "/|\\"
+-- Default player sprite (single character)
+sprite = "🚶"  -- Walking person emoji
+
+-- Animation frames (future):
+animations = {
+  idle = "🧍",
+  walk_up = "🚶",
+  walk_down = "🚶",
+  walk_left = "🚶",
+  walk_right = "🚶"
 }
+
+-- Fallback for non-emoji terminals:
+sprite = "●"  -- or cursor position
 ```
 
 **Functions**:
@@ -159,11 +223,13 @@ dirquest.nvim/
 - `get_position()` - Return current player position
 - `set_position(x, y)` - Set player position
 
-**Movement Rules**:
-- Cannot move through location boundaries (structure collision rectangles)
-- Can enter locations through entrances
-- Free movement in open space
-- Coordinate-based collision detection with structures and ground
+**Movement Rules (Top-Down)**:
+- Cannot move through directory structure boundaries
+- Cannot move outside buffer border area
+- Can move freely in playable area
+- Entrance interaction: player within 1 tile of entrance point
+- File interaction: player within 1 tile of file sprite
+- Coordinate-based collision detection with all objects
 
 #### 2.5 Filesystem Interface (`filesystem.lua`)
 **Purpose**: Abstract file system operations
@@ -184,61 +250,72 @@ dirquest.nvim/
 #### 2.6 ASCII Art Generator (`ascii_art.lua`)
 **Purpose**: Generate and store ASCII art templates
 
-**Directory Art Templates**:
-Multiple templates based on directory size/content:
+**Directory Art Templates (Top-Down View)**:
+Box-style templates for top-down perspective:
 
 ```lua
--- Small building (for directories with few files)
+-- Small directory (< 5 items)
 {
-  "    ___  ",
-  "   |   | ",
-  "   | D |",
-  "   |___| ",
-  "  /     \\",
-  " /       \\",
-  "-----------"
+  "╔═══════╗",
+  "║ name  ║",
+  "║       ║",
+  "╚═══════╝"
 }
 
--- Large castle (for directories with many subdirs)
+-- Medium directory (5-15 items)
 {
-  "     ___       ___     ",
-  "    |   |     |   |    ",
-  "    |   |_____|   |    ",
-  "    |             |    ",
-  "    |   DIRNAME   |    ",
-  "    |             |    ",
-  "    |_____   _____|    ",
-  "          | |          ",
-  "    ====================",
+  "╔═══════════╗",
+  "║   name    ║",
+  "║           ║",
+  "║           ║",
+  "╚═══════════╝"
 }
 
--- Cave entrance (for hidden directories)
+-- Large directory (> 15 items)
 {
-  "  /\\  /\\  /\\  ",
-  " /  \\/  \\/  \\ ",
-  "|    .name   |",
-  "|            |",
-  " \\          / ",
-  "  \\________/  "
+  "╔═══════════════╗",
+  "║     name      ║",
+  "║               ║",
+  "║               ║",
+  "║               ║",
+  "╚═══════════════╝"
+}
+
+-- Hidden directory (starts with .)
+{
+  "┌─────────┐",
+  "│  .name  │",
+  "│  (hide) │",
+  "└─────────┘"
 }
 ```
 
-**File Sprites by Type**:
+**Entrance Standardization**:
+- All directory entrances at bottom-center of box
+- Interaction radius: 1 tile (standardized)
+- Visual indicator: gap or special character at entrance
+
+**File Sprites (Top-Down - Single Character)**:
 ```lua
 file_sprites = {
-  lua = { "📜", "LUA" },      -- Scroll for scripts
-  txt = { "📄", "TXT" },      -- Paper
-  md = { "📝", "MD" },        -- Note
-  png = { "🖼️ ", "IMG" },     -- Picture frame
-  default = { "📦", "FILE" }  -- Box
+  lua = "📜",       -- Lua script
+  txt = "📄",       -- Text file
+  md = "📝",        -- Markdown
+  js = "📘",        -- JavaScript
+  py = "🐍",        -- Python
+  png = "🖼️",       -- Image
+  default = "📦"   -- Generic file
 }
+
+-- Interaction zone: 1 tile radius around sprite
+interaction_radius = 1
 ```
 
 **Functions**:
-- `get_directory_art(name, size, type)` - Return art with name embedded
-- `get_file_sprite(filename)` - Return sprite based on extension
+- `get_directory_art(name, size, type)` - Return top-down box art with name
+- `get_file_sprite(filename)` - Return single-char emoji sprite
 - `embed_text(art, text, position)` - Insert text into art
-- `generate_ground(width)` - Create ground/floor patterns
+- `generate_border(width, height)` - Create buffer border lines
 
 #### 2.7 Input Handler (`input.lua`)
 **Purpose**: Map keyboard input to game actions
@@ -266,26 +343,30 @@ file_sprites = {
 
 ## Game Flow
 
-### 3.1 Initialization
+### 3.1 Initialization (Top-Down)
 1. User runs `:DirQuest` or `:DirQuest /path/to/dir`
 2. Plugin creates new buffer and window
-3. Game state initialized with starting directory
-4. World generated from directory contents
-5. Player spawned at left side of world
-6. Initial render performed
-7. Keymaps activated
+3. Calculate playable area (buffer dimensions minus borders)
+4. Game state initialized with starting directory
+5. World generated from directory contents (fills entire playable area)
+6. Player spawned at center or safe spawn point
+7. Initial render performed with borders
+8. Keymaps activated
 
-### 3.2 Exploration Mode
-1. Player moves using hjkl
-2. Renderer updates player position
-3. HUD shows current directory path
-4. Interactive elements highlighted
-5. Collision detection prevents invalid moves
-6. When player reaches entrance of location and presses Enter:
+### 3.2 Exploration Mode (Top-Down)
+1. Player moves using hjkl (single character, moves 1 tile at a time)
+2. Renderer updates player position (emoji sprite)
+3. HUD shows current directory path at top
+4. Interactive elements use emoji sprites
+5. Collision detection:
+   - Prevents moving through directory boxes
+   - Prevents moving outside buffer border
+   - No "ground" collision (top-down view)
+6. When player within 1 tile of entrance and presses Enter:
    - Load subdirectory
-   - Generate new world
-   - Reset player position
-7. When player reaches file and presses Enter:
+   - Generate new world (fills buffer)
+   - Spawn player at safe location
+7. When player within 1 tile of file and presses Enter:
    - Exit game buffer
    - Open file in normal buffer
 
@@ -303,41 +384,62 @@ file_sprites = {
 - Show files as interactive objects
 - Press Escape to return to parent
 
-### 3.4 Rendering Pipeline
+### 3.4 Rendering Pipeline (Top-Down)
 1. Calculate buffer dimensions
-2. Create 2D array of spaces (empty world)
-3. Draw ground layer
-4. Draw location structures
-5. Draw file objects
-6. Draw player sprite
-7. Draw HUD overlay
-8. Convert 2D array to buffer lines
-9. Apply syntax highlighting
-10. Set buffer as unmodifiable
+2. Calculate playable area (minus borders)
+3. Create 2D array of spaces (empty world)
+4. Draw buffer borders (top, bottom, left, right)
+5. Draw HUD in top border area
+6. Distribute directory boxes throughout playable area
+7. Place file sprites in open spaces
+8. Draw player sprite (single emoji character)
+9. Draw status line in bottom border
+10. Convert 2D array to buffer lines
+11. Apply syntax highlighting
+12. Set buffer as unmodifiable
 
 ## Implementation Details
 
-### 4.1 Coordinate System
+### 4.1 Coordinate System (Top-Down)
 - Origin (0,0) at top-left of buffer
 - X increases rightward
 - Y increases downward
-- Player position is center of sprite
-- World can be larger than viewport (scroll handled by Neovim)
+- Border offsets:
+  - `border.top` lines reserved for HUD (default: 3)
+  - `border.bottom` lines reserved for status (default: 2)
+  - `border.left` columns reserved (default: 2)
+  - `border.right` columns reserved (default: 2)
+- Playable area: `(border.left, border.top)` to `(width - border.right, height - border.bottom)`
+- Player position is single cell (1x1)
+- World fills entire playable area (no scrolling needed)
 
 ### 4.2 Collision Detection
 
 The collision system uses **coordinate-based rectangle overlap detection** (AABB - Axis-Aligned Bounding Box) instead of checking ASCII symbols in the grid. This provides a clean separation between visual representation and collision logic.
 
-**World Structure**:
+**World Structure (Top-Down)**:
 ```lua
 world = {
-  width = 150,
-  height = 20,
+  width = 80,                  -- Total buffer width
+  height = 24,                 -- Total buffer height
+  border = {                   -- Border dimensions
+    top = 3,
+    bottom = 2,
+    left = 2,
+    right = 2
+  },
+  playable_area = {            -- Calculated playable space
+    x_start = 2,
+    y_start = 3,
+    x_end = 78,
+    y_end = 22,
+    width = 76,
+    height = 19
+  },
   grid = {},                   -- 2D array for visual display
-  collision_rects = {},        -- Array of collision rectangles
+  collision_rects = {},        -- Array of collision rectangles (includes borders)
   locations = {},              -- Array of location objects
-  objects = {},                -- Array of file objects
-  ground_level = 15
+  objects = {}                 -- Array of file objects
 }
 ```
 
