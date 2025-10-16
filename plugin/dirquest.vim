@@ -3,5 +3,5 @@ if exists('g:loaded_dirquest')
 endif
 let g:loaded_dirquest = 1
 
-command! -nargs=0 DirQuest lua require('dirquest').start()
+command! -nargs=? -complete=dir DirQuest lua require('dirquest').start(<f-args>)
 command! -nargs=0 DirQuestQuit lua require('dirquest').close()

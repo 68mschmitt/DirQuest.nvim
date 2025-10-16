@@ -10,15 +10,18 @@ Transform your file system navigation into an open-world side-scroller adventure
 - **Pure Lua**: 100% Lua implementation with zero external dependencies
 - **Lightweight**: Fast and efficient, designed for Neovim
 
-## 🚀 Current Status: Phase 1 (v0.1.0)
+## 🚀 Current Status: Phase 2 (v0.2.0)
 
 DirQuest is under active development. Currently implemented:
 - ✅ Basic buffer and plugin infrastructure
 - ✅ Buffer creation and management
 - ✅ Quit functionality
+- ✅ File system reading and directory listing
+- ✅ Navigate into subdirectories
+- ✅ Distinguish between files and directories
+- ✅ Open files from the explorer
 
 Coming soon:
-- 📁 File system reading and directory listing
 - 🎮 Player sprite and movement
 - 🏰 ASCII art world generation
 - 🎯 Collision detection and interaction
@@ -62,18 +65,19 @@ EOF
 
 ### Commands
 
-- `:DirQuest` - Start the game (opens in current directory)
+- `:DirQuest [path]` - Start the game (opens in specified directory or current directory)
 - `:DirQuestQuit` - Exit the game
 
 ### Keybindings (In-game)
 
 Currently available:
-- `q` - Quit DirQuest
-- `<Esc>` - Quit DirQuest
+- `q` / `<Esc>` - Quit DirQuest
+- `<CR>` (Enter) - Open directory or file
+- `-` - Go to parent directory
+- `j` / `k` - Navigate up/down the list
 
 Coming in future phases:
-- `h`, `j`, `k`, `l` - Move player character
-- `<CR>` (Enter) - Interact with directories/files
+- `h`, `j`, `k`, `l` - Move player character in 2D world
 - `r` - Refresh current directory
 - `?` - Show help
 
@@ -97,11 +101,13 @@ require('dirquest').setup({
 - Basic window management
 - Clean shutdown
 
-### Phase 2: File System Reading (Coming Next)
+### Phase 2: File System Reading ✅
 - Directory reading from file system
 - Distinguishing between files and directories
 - Display current directory path
 - List all items in current directory
+- Navigate into subdirectories
+- Open files
 
 ### Phase 3: Player Sprite and Movement
 - Player sprite rendering
