@@ -1,6 +1,7 @@
 local M = {}
 
 local game = require('dirquest.game')
+local player = require('dirquest.player')
 
 function M.create_buffer()
   local buf = vim.api.nvim_create_buf(false, true)
@@ -16,6 +17,62 @@ function M.create_buffer()
   vim.api.nvim_set_current_buf(buf)
 
   return buf
+end
+
+function M.render_world(buffer)
+  local width = vim.api.nvim_win_get_width(0)
+  local height = vim.api.nvim_win_get_height(0)
+  
+  local world = {}
+  for y = 1, height do
+    world[y] = {}
+    for x = 1, width do
+      world[y][x] = " "
+    end
+  end
+  
+  local header_height = 3
+  
+  for x = 1, width do
+    if header_height < height then
+      world[header_height][x] = "="
+    end
+  end
+  
+  local px, py = player.get_position()
+  local sprite = player.get_sprite()
+  
+  for i, line in ipairs(sprite) do
+    local sprite_y = py + i - 1
+    if sprite_y > 0 and sprite_y <= height then
+      for j = 1, #line do
+        local sprite_x = px + j - 1
+        if sprite_x > 0 and sprite_x <= width then
+          world[sprite_y][sprite_x] = line:sub(j, j)
+        end
+      end
+    end
+  end
+  
+  local lines = {}
+  table.insert(lines, "")
+  table.insert(lines, "  📁 " .. game.state.current_dir)
+  table.insert(lines, "")
+  
+  for y = 4, height do
+    local line = ""
+    for x = 1, width do
+      line = line .. (world[y][x] or " ")
+    end
+    table.insert(lines, line)
+  end
+  
+  table.insert(lines, "")
+  table.insert(lines, "  Controls: hjkl = move | <CR> = interact | - = parent | q = quit")
+
+  vim.api.nvim_buf_set_option(buffer, 'modifiable', true)
+  vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
+  vim.api.nvim_buf_set_option(buffer, 'modifiable', false)
 end
 
 function M.render_directory(buffer)
@@ -58,7 +115,7 @@ function M.render_welcome(buffer)
     "",
     "  ╔══════════════════════════════════════════════════════════╗",
     "  ║                                                          ║",
-    "  ║                      DirQuest v0.1.0                     ║",
+    "  ║                      DirQuest v0.3.0                     ║",
     "  ║                                                          ║",
     "  ║            Navigate your filesystem as a game            ║",
     "  ║                                                          ║",
@@ -70,9 +127,10 @@ function M.render_welcome(buffer)
     "  This is a side-scrolling file explorer game for Neovim.",
     "",
     "  Controls:",
+    "    hjkl       - Move player",
     "    q / <Esc>  - Quit",
     "",
-    "  Phase 1: Basic Buffer and Plugin Infrastructure",
+    "  Phase 3: Player Sprite and Movement",
     "",
   }
 

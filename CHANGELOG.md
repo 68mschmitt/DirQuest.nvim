@@ -60,13 +60,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Proper separation of concerns between modules
 - Directory items sorted alphabetically (case-insensitive)
 
+## [0.3.0] - 2025-10-16
+
+### Added
+- Phase 3 implementation - Player Sprite and Movement
+- `player.lua` module with sprite and position management
+- Player sprite rendering in 2D world view
+- HJKL movement controls for player
+- Boundary checking to prevent moving outside buffer
+- Player position tracking across movements
+- `render_world()` function for 2D world with player
+- Support for custom player sprites via setup()
+- Player reset on close
+
+### Changed
+- Updated `init.lua` to initialize player and handle movement
+- Updated `renderer.lua` with world rendering function
+- Version bumped to 0.3.0
+- Controls updated to use hjkl for movement
+- Switched from list view to 2D world view
+
+### Technical Details
+- `lua/dirquest/player.lua` - Player sprite and movement logic
+- Default player sprite: " o " and "/|\\"
+- Movement respects buffer dimensions
+- 2D character grid rendering system
+- Player drawn on top of world grid
+
 ## [Unreleased]
 
-### Phase 3 - Coming Next
-- Player sprite rendering
-- HJKL movement controls
-- Player position tracking
-- Basic boundary checking
+### Phase 4 - Coming Next
+- Simple ASCII art for directories
+- Ground/floor rendering
+- 2D coordinate system for world layout
+- Scrollable world
 
 ### Future Phases
 - Player sprite and movement (Phase 3)
