@@ -31,7 +31,7 @@ function M.move(direction, world_width, world_height, world)
     new_y = new_y + 1
   end
   
-  if M.can_move_to(new_x, new_y, world_width, world_height, world) then
+  if M.can_move_to(new_x, new_y, world_width, world_height, world, direction) then
     M.state.x = new_x
     M.state.y = new_y
     return true
@@ -40,7 +40,7 @@ function M.move(direction, world_width, world_height, world)
   return false
 end
 
-function M.can_move_to(x, y, world_width, world_height, world)
+function M.can_move_to(x, y, world_width, world_height, world, direction)
   if x < 0 or y < 0 then
     return false
   end
@@ -56,7 +56,12 @@ function M.can_move_to(x, y, world_width, world_height, world)
   if world and world.grid then
     if y >= 1 and y <= world_height and x >= 1 and x <= world_width then
       local cell = world.grid[y][x]
-      if cell == "=" or cell == "|" or cell == "_" or cell == "-" then
+      
+      if cell == "=" then
+        if direction == "down" then
+          return false
+        end
+      elseif cell == "|" or cell == "_" or cell == "-" then
         return false
       end
     end
