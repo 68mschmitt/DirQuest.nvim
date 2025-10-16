@@ -172,18 +172,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Large template entrance: (7, 5)
 - Detection range: 2 tiles (configurable)
 
+## [0.6.0] - 2025-10-16
+
+### Added
+- **MAJOR REDESIGN**: Phase 6 - Top-Down View
+- Single-character player sprite (🚶 emoji, 1×1 collision box)
+- Buffer border system with HUD and status areas
+- Top-down box-drawing directory templates (╔═╗ style)
+- Single-character emoji file sprites (📜, 📄, 🐍, etc.)
+- Full-buffer world layout (objects distributed throughout playable area)
+- Playable area calculation with border offsets
+- Border collision detection (prevents leaving playable area)
+- Hidden directory template (┌─┐ style)
+- Support for 20+ file type emoji icons
+
+### Changed
+- **Complete visual paradigm shift**: Side-scroller → Top-down view
+- Player sprite: 3×2 multi-line → 1×1 single emoji character
+- World layout: Horizontal ground-based → Full 2D grid distribution
+- Directory templates: Side-view buildings → Top-down boxes
+- File sprites: Multi-char labels ([L]) → Single emojis (📜)
+- Collision detection: Updated for 1×1 player dimensions
+- Interaction radius: Standardized to 1 tile for all objects
+- Version bumped to 0.6.0
+
+### Removed
+- Ground system (no more ground level or gravity concept)
+- Side-scrolling layout algorithm
+- Multi-line player sprite support
+
+### Technical Details
+- `lua/dirquest/player.lua` - Single string sprite, 1×1 collision
+- `lua/dirquest/ascii_art.lua` - Top-down box templates, emoji sprites
+- `lua/dirquest/world.lua` - Border system, grid-based layout, display width calculations
+- `lua/dirquest/renderer.lua` - Border rendering with HUD/status
+- Uses `vim.fn.strwidth()` for proper multi-byte character width
+- Playable area: Buffer dimensions minus borders (default: 3 top, 2 bottom, 2 sides)
+
 ## [Unreleased]
 
-### Phase 6 - Coming Next
-- Multiple directory art templates for variety
-- Enhanced ASCII art with visual details
-- File type-specific sprites with better icons
-- Syntax highlighting for world elements
-- Improved HUD layout and design
-- Visual polish and decorative elements
+### Phase 7 - Coming Next
+- User configuration system
+- Custom player sprites
+- Configurable borders and spacing
+- Custom keybindings
+- Color scheme customization
 
 ### Future Phases
-- Visual polish and enhanced art (Phase 6)
 - Configuration and customization (Phase 7)
 - Error handling and edge cases (Phase 8)
 - Performance optimization (Phase 9)

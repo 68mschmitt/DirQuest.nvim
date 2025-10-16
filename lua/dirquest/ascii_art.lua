@@ -3,51 +3,79 @@ local M = {}
 M.directory_templates = {
   small = {
     art = {
-      "  ___  ",
-      " |   | ",
-      " |   | ",
-      " |___| ",
+      "╔═══════╗",
+      "║ name  ║",
+      "║       ║",
+      "╚═══════╝"
     },
-    entrance = { x = 3, y = 3 }
+    entrance = { x = 4, y = 3 }
   },
   
   medium = {
     art = {
-      "   _____   ",
-      "  |     |  ",
-      "  |     |  ",
-      "  |     |  ",
-      "  |_____|  ",
+      "╔═══════════╗",
+      "║   name    ║",
+      "║           ║",
+      "║           ║",
+      "╚═══════════╝"
     },
-    entrance = { x = 5, y = 4 }
+    entrance = { x = 6, y = 4 }
   },
   
   large = {
     art = {
-      "    _______    ",
-      "   |       |   ",
-      "   |       |   ",
-      "   |       |   ",
-      "   |       |   ",
-      "   |_______|   ",
+      "╔═══════════════╗",
+      "║     name      ║",
+      "║               ║",
+      "║               ║",
+      "║               ║",
+      "╚═══════════════╝"
     },
-    entrance = { x = 7, y = 5 }
+    entrance = { x = 8, y = 5 }
+  },
+  
+  hidden = {
+    art = {
+      "┌─────────┐",
+      "│  name   │",
+      "│ (hide)  │",
+      "└─────────┘"
+    },
+    entrance = { x = 5, y = 3 }
   }
 }
 
 M.file_sprites = {
-  lua = { "[L]" },
-  txt = { "[T]" },
-  md = { "[M]" },
-  js = { "[J]" },
-  py = { "[P]" },
-  default = { "[F]" }
+  lua = "📜",
+  txt = "📄",
+  md = "📝",
+  js = "📘",
+  py = "🐍",
+  rb = "💎",
+  go = "🐹",
+  rs = "🦀",
+  java = "☕",
+  cpp = "⚙️",
+  c = "⚙️",
+  png = "🖼️",
+  jpg = "🖼️",
+  gif = "🖼️",
+  json = "📋",
+  yaml = "📋",
+  yml = "📋",
+  xml = "📋",
+  sh = "📜",
+  default = "📦"
 }
 
-function M.get_directory_art(name, size)
+M.interaction_radius = 1
+
+function M.get_directory_art(name, size, is_hidden)
   local template
   
-  if size < 5 then
+  if is_hidden then
+    template = M.directory_templates.hidden
+  elseif size < 5 then
     template = M.directory_templates.small
   elseif size < 15 then
     template = M.directory_templates.medium
@@ -60,7 +88,7 @@ function M.get_directory_art(name, size)
     table.insert(art, line)
   end
   
-  local name_line = math.floor(#art / 2) + 1
+  local name_line = 2
   art = M.embed_text(art, name, name_line)
   
   return art, template.entrance
@@ -91,19 +119,11 @@ end
 function M.get_file_sprite(filename)
   local ext = filename:match("%.([^%.]+)$")
   
-  if ext and M.file_sprites[ext] then
-    return M.file_sprites[ext]
+  if ext and M.file_sprites[ext:lower()] then
+    return M.file_sprites[ext:lower()]
   end
   
   return M.file_sprites.default
-end
-
-function M.generate_ground(width)
-  local ground = ""
-  for i = 1, width do
-    ground = ground .. "="
-  end
-  return ground
 end
 
 return M

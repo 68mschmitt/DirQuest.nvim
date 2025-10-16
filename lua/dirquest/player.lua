@@ -1,14 +1,15 @@
 local M = {}
 
-M.default_sprite = {
-    " o ",
-    "/|\\"
-}
+M.default_sprite = "🚶"
 
 M.state = {
     x = 5,
     y = 5,
-    sprite = M.default_sprite
+    sprite = M.default_sprite,
+    animation = {
+        idle = "🧍",
+        walk = "🚶"
+    }
 }
 
 function M.init(x, y, sprite)
@@ -54,25 +55,15 @@ function M.can_move_to(x, y, world_width, world_height, world, direction)
     end
 
     if world and world.collision_rects then
-        local sprite = M.state.sprite
-        local sprite_width = #sprite[1]
-        local sprite_height = #sprite
-        
         local player_rect = {
             x = x,
             y = y,
-            width = sprite_width,
-            height = sprite_height
+            width = 1,
+            height = 1
         }
         
         for _, collision_rect in ipairs(world.collision_rects) do
-            if collision_rect.type == "ground" then
-                if direction == "down" then
-                    if M.rects_overlap(player_rect, collision_rect) then
-                        return false
-                    end
-                end
-            elseif collision_rect.type == "structure" then
+            if collision_rect.type == "border" or collision_rect.type == "structure" then
                 if M.rects_overlap(player_rect, collision_rect) then
                     return false
                 end

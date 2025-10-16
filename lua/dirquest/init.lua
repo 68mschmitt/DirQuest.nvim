@@ -4,7 +4,7 @@ local renderer = require('dirquest.renderer')
 local game = require('dirquest.game')
 local player = require('dirquest.player')
 
-M.version = "0.5.0"
+M.version = "0.6.0"
 
 function M.start(path)
   if game.state.buffer and vim.api.nvim_buf_is_valid(game.state.buffer) then
