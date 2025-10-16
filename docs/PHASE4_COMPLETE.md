@@ -20,15 +20,16 @@ Phase 4 has been successfully implemented with all required functionality for AS
    - `generate_ground(width)` - Creates ground line
    - Template selection heuristics (<5, 5-15, >15 items)
 
-2. **lua/dirquest/world.lua** (143 lines)
+2. **lua/dirquest/world.lua** (160 lines)
    - `generate_world(width, height)` - Creates complete world
-   - `draw_ground(world)` - Renders ground level
+   - `draw_ground(world)` - Renders ground level and registers collision rect
    - `layout_locations(world)` - Positions directories horizontally
    - `place_files(world)` - Places file sprites
    - `draw_location(world, location)` - Draws directory structure
    - `draw_object(world, obj)` - Draws file sprite
    - `get_object_at(world, x, y)` - Detects object at coordinates
    - World grid system with 2D array
+   - **Collision rectangle tracking system**
    - Automatic spacing between structures
 
 3. **tests/test_phase4.sh** - Comprehensive Phase 4 test suite (7 tests)
@@ -69,6 +70,11 @@ Phase 4 has been successfully implemented with all required functionality for AS
 ✅ Object placement at coordinates  
 ✅ Object detection at position  
 ✅ Interaction with visual objects  
+✅ **Coordinate-based collision system** (Rectangle collision detection)  
+✅ **Collision rectangles tracking** (`world.collision_rects` array)  
+✅ **AABB overlap detection** (Axis-Aligned Bounding Box)  
+✅ **Ground collision** (blocks downward movement only)  
+✅ **Structure collision** (blocks all directions)  
 
 ### Manual Testing Results
 
@@ -124,6 +130,8 @@ All Phase 4 success criteria met:
 - **File Visibility** - Files shown as distinct sprites with types
 - **Spatial Layout** - Horizontal arrangement creates exploration space
 - **Object System** - Foundation for collision and interaction
+- **Collision System** - Coordinate-based rectangle collision detection
+- **Clean Architecture** - Visual grid separate from collision logic
 
 ### Directory Art Templates
 
@@ -166,13 +174,59 @@ All Phase 4 success criteria met:
 ### World Generation System
 
 1. **Initialize Grid** - Create 2D array of spaces
-2. **Draw Ground** - Place = symbols at ground level
+2. **Draw Ground** - Place = symbols at ground level + register collision rect
 3. **Read Directory** - Get list of dirs and files
 4. **Generate Art** - Create ASCII art for each directory
 5. **Position Objects** - Place horizontally with spacing
-6. **Draw Structures** - Copy art to world grid
+6. **Draw Structures** - Copy art to world grid + register collision rects
 7. **Place Files** - Add file sprites
 8. **Draw Player** - Overlay player on top
+
+### Collision Detection System
+
+**Architecture**:
+- Separates visual representation (grid) from collision logic (rectangles)
+- Uses AABB (Axis-Aligned Bounding Box) algorithm for overlap detection
+- Each structure and ground registers a collision rectangle
+
+**World Structure**:
+```lua
+world = {
+  width = 150,
+  height = 20,
+  grid = {},                 -- Visual 2D array
+  collision_rects = {},      -- Array of collision rectangles
+  locations = {},
+  objects = {},
+  ground_level = 15
+}
+```
+
+**Collision Rectangle Format**:
+```lua
+{
+  x = 5,                     -- Top-left X position
+  y = 10,                    -- Top-left Y position
+  width = 11,                -- Width in characters
+  height = 5,                -- Height in characters
+  type = "structure",        -- "structure" or "ground"
+  object = location_ref      -- Optional reference
+}
+```
+
+**Player Collision Logic**:
+- Player treated as rectangle based on sprite dimensions (3×2)
+- `can_move_to()` checks rectangle overlap with all collision rects
+- Ground blocks only downward movement
+- Structures block movement in all directions
+- Uses `rects_overlap()` helper for AABB detection
+
+**Benefits**:
+- More efficient than checking grid cells (O(n) vs O(w×h))
+- Visual changes don't affect collision behavior
+- Easy to add new collision types
+- Player sprite characters don't cause false collisions
+- Cleaner, more maintainable code
 
 ### Code Quality
 
@@ -215,12 +269,14 @@ All Phase 4 success criteria met:
 Phase 4 is complete and ready for Phase 5 implementation.
 
 **Phase 5 Goals**:
-- Implement collision detection with structures
-- Add entrance/door system for directories
-- Prevent walking through walls
-- Allow entering only through designated doors
-- Detect when player is at entrance
-- Show interaction prompts
+- ✅ **COMPLETED**: Coordinate-based collision detection with structures
+- ✅ **COMPLETED**: Prevent walking through walls
+- **Remaining**: Add entrance/door system for directories
+- **Remaining**: Allow entering only through designated doors
+- **Remaining**: Detect when player is at entrance
+- **Remaining**: Show interaction prompts
+
+**Note**: Basic collision detection was implemented in Phase 4 using a coordinate-based system. Phase 5 will focus on refining the interaction system with entrances and prompts.
 
 **To start Phase 5**, refer to:
 - docs/SPEC.md Phase 5 section
@@ -234,6 +290,9 @@ Phase 4 is complete and ready for Phase 5 implementation.
 - Ground level calculated as height - 5
 - Spacing of 15 characters between structures
 - Text embedding centers names in boxes
+- **Collision system uses coordinate rectangles, not ASCII symbol checking**
+- Player sprite dimensions: 3×2 characters (" o " and "/|\")
+- Collision detection runs in O(n) time where n = number of collision rects
 
 ### Technical Highlights
 
@@ -246,6 +305,13 @@ Phase 4 is complete and ready for Phase 5 implementation.
 - 2D array allows complex layouts
 - Layer system (world → objects → player)
 - Efficient character-by-character drawing
+- Visual grid is separate from collision logic
+
+**Collision System**:
+- Coordinate-based rectangle tracking
+- AABB (Axis-Aligned Bounding Box) overlap detection
+- Efficient O(n) collision checks
+- Type-specific collision behavior (ground vs structure)
 
 **Object Placement**:
 - Automatic horizontal layout

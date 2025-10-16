@@ -364,14 +364,16 @@ lua/dirquest/input.lua
 ```
 
 ### Implementation Tasks
-1. Mark which cells in world 2D array are solid/walkable
-2. Update player movement to check collision before moving
+1. ✅ **COMPLETED IN PHASE 4**: Coordinate-based collision system with `collision_rects` array
+2. ✅ **COMPLETED IN PHASE 4**: Rectangle overlap detection (AABB) for player movement
 3. Define entrance points for each directory structure
 4. Detect when player is at entrance
 5. Show interaction hint in HUD
-6. Implement Enter key to transition into directory
-7. Implement interaction with file objects
-8. Add Escape key to go to parent directory
+6. Implement Enter key to transition into directory (partially done)
+7. Implement interaction with file objects (partially done)
+8. Add Escape key to go to parent directory (partially done)
+
+**Note**: Phase 4 implemented a robust coordinate-based collision system that separates visual representation from collision logic. Collision rectangles are tracked in `world.collision_rects` and checked using AABB (Axis-Aligned Bounding Box) overlap detection. This provides better performance and maintainability than checking individual grid cells.
 
 ### Manual Test Procedures
 

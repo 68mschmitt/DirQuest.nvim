@@ -17,6 +17,7 @@ function M.generate_world(width, height)
     grid = {},
     locations = {},
     objects = {},
+    collision_rects = {},
     ground_level = height - 5,
     view_width = width
   }
@@ -42,6 +43,14 @@ function M.draw_ground(world)
   for x = 1, world.width do
     world.grid[world.ground_level][x] = "="
   end
+  
+  table.insert(world.collision_rects, {
+    x = 1,
+    y = world.ground_level,
+    width = world.width,
+    height = 1,
+    type = "ground"
+  })
 end
 
 function M.layout_locations(world)
@@ -72,6 +81,15 @@ function M.layout_locations(world)
     
     M.draw_location(world, location)
     table.insert(world.locations, location)
+    
+    table.insert(world.collision_rects, {
+      x = location.x,
+      y = location.y,
+      width = location.width,
+      height = location.height,
+      type = "structure",
+      object = location
+    })
     
     x_offset = x_offset + location.width + spacing
     

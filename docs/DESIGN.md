@@ -93,8 +93,20 @@ dirquest.nvim/
   width = 30,                  -- Width of the location
   height = 15,                 -- Height of the location
   art = {},                    -- ASCII art lines
-  entrance = { x = 25, y = 24 }, -- Entrance coordinates
-  is_entered = false           -- Whether player has entered
+  entrance = { x = 25, y = 24 }, -- Entrance coordinates (future)
+  is_directory = true          -- Directory flag
+}
+```
+
+**Collision Rectangle**:
+```lua
+{
+  x = 20,                      -- Start X position
+  y = 10,                      -- Start Y position
+  width = 30,                  -- Width of collision area
+  height = 15,                 -- Height of collision area
+  type = "structure",          -- "structure" or "ground"
+  object = location            -- Reference to location/object (optional)
 }
 ```
 
@@ -112,12 +124,13 @@ dirquest.nvim/
 ```
 
 **Functions**:
-- `generate_world(directory)` - Create world from directory
-- `create_location(dir_info, position)` - Generate location ASCII art
-- `create_object(file_info, position)` - Generate file sprite
-- `layout_locations(locations)` - Arrange locations spatially
-- `get_location_at(x, y)` - Return location at coordinates
-- `get_object_at(x, y)` - Return file object at coordinates
+- `generate_world(width, height)` - Create world from directory
+- `draw_ground(world)` - Draw ground and add collision rect
+- `layout_locations(world)` - Arrange locations spatially
+- `draw_location(world, location)` - Draw location art to grid
+- `place_files(world)` - Place file sprites
+- `draw_object(world, obj)` - Draw object sprite to grid
+- `get_object_at(world, x, y)` - Return location/object at coordinates
 
 **Layout Algorithm**:
 1. Read directory contents
@@ -140,17 +153,17 @@ dirquest.nvim/
 ```
 
 **Functions**:
-- `move(direction)` - Move player in direction
-- `can_move_to(x, y)` - Check collision/boundaries
-- `interact()` - Interact with object at player position
-- `get_collision_bounds()` - Return player hitbox
-- `update_position(x, y)` - Set player position
+- `move(direction, world_width, world_height, world)` - Move player in direction
+- `can_move_to(x, y, world_width, world_height, world, direction)` - Check collision/boundaries
+- `rects_overlap(rect1, rect2)` - Check if two rectangles overlap (AABB collision)
+- `get_position()` - Return current player position
+- `set_position(x, y)` - Set player position
 
 **Movement Rules**:
-- Cannot move through location boundaries (walls)
+- Cannot move through location boundaries (structure collision rectangles)
 - Can enter locations through entrances
 - Free movement in open space
-- Collision detection with objects
+- Coordinate-based collision detection with structures and ground
 
 #### 2.5 Filesystem Interface (`filesystem.lua`)
 **Purpose**: Abstract file system operations
@@ -312,14 +325,92 @@ file_sprites = {
 - World can be larger than viewport (scroll handled by Neovim)
 
 ### 4.2 Collision Detection
+
+The collision system uses **coordinate-based rectangle overlap detection** (AABB - Axis-Aligned Bounding Box) instead of checking ASCII symbols in the grid. This provides a clean separation between visual representation and collision logic.
+
+**World Structure**:
 ```lua
-function can_move_to(x, y)
+world = {
+  width = 150,
+  height = 20,
+  grid = {},                   -- 2D array for visual display
+  collision_rects = {},        -- Array of collision rectangles
+  locations = {},              -- Array of location objects
+  objects = {},                -- Array of file objects
+  ground_level = 15
+}
+```
+
+**Collision Detection Algorithm**:
+```lua
+function can_move_to(x, y, world_width, world_height, world, direction)
   -- Check buffer boundaries
-  -- Check location walls
-  -- Check if position is walkable
-  -- Return boolean
+  if x < 0 or y < 0 then return false end
+  if x >= world_width or y >= world_height then return false end
+  
+  -- Create player bounding box
+  local player_rect = {
+    x = x,
+    y = y,
+    width = sprite_width,
+    height = sprite_height
+  }
+  
+  -- Check collision with each rect
+  for _, collision_rect in ipairs(world.collision_rects) do
+    if collision_rect.type == "ground" then
+      -- Ground only blocks downward movement
+      if direction == "down" and rects_overlap(player_rect, collision_rect) then
+        return false
+      end
+    elseif collision_rect.type == "structure" then
+      -- Structures block all directions
+      if rects_overlap(player_rect, collision_rect) then
+        return false
+      end
+    end
+  end
+  
+  return true
+end
+
+function rects_overlap(rect1, rect2)
+  return rect1.x < rect2.x + rect2.width and
+         rect1.x + rect1.width > rect2.x and
+         rect1.y < rect2.y + rect2.height and
+         rect1.y + rect1.height > rect2.y
 end
 ```
+
+**Collision Registration**:
+When world objects are created, collision rectangles are automatically registered:
+```lua
+-- Ground collision
+table.insert(world.collision_rects, {
+  x = 1,
+  y = world.ground_level,
+  width = world.width,
+  height = 1,
+  type = "ground"
+})
+
+-- Structure collision
+table.insert(world.collision_rects, {
+  x = location.x,
+  y = location.y,
+  width = location.width,
+  height = location.height,
+  type = "structure",
+  object = location
+})
+```
+
+**Benefits of Coordinate-Based Collision**:
+- Visual grid and collision logic are decoupled
+- Player sprite characters don't interfere with collision checks
+- More efficient (O(n) collision rects vs O(width × height) grid checks)
+- Easy to add new collision types or modify behavior
+- Cleaner, more maintainable code
 
 ### 4.3 World Layout Algorithm
 ```lua
