@@ -1,30 +1,49 @@
-local fs       = require("memory_maze.fs")
-local persist  = require("memory_maze.persist")
-local layout   = require("memory_maze.layout")
-local renderer = require("memory_maze.renderer")
-local input    = require("memory_maze.input")
-local state    = require("memory_maze.state")
-
 local M = {}
 
-function M.start(root)
-  -- Root = cwd by default
-  root = root or vim.loop.cwd()
+local renderer = require('dirquest.renderer')
 
-  -- Initialize global game state
-  state.reset()
-  state.cwd = root
+M.version = "0.1.0"
 
-  -- Load dir items + persisted layout
-  local items = fs.scan_dir(root)
-  local meta  = persist.load(root)
-  local room  = layout.build_room(root, items, meta)
+local state = {
+  buffer = nil,
+  window = nil,
+}
 
-  state.room = room
-  renderer.open_buffer()
-  renderer.draw()
+function M.start()
+  if state.buffer and vim.api.nvim_buf_is_valid(state.buffer) then
+    vim.api.nvim_buf_delete(state.buffer, { force = true })
+  end
 
-  input.bind_keys()
+  state.buffer = renderer.create_buffer()
+  state.window = vim.api.nvim_get_current_win()
+
+  renderer.render_welcome(state.buffer)
+
+  M.setup_keymaps(state.buffer)
+end
+
+function M.setup_keymaps(buffer)
+  local opts = { noremap = true, silent = true, buffer = buffer }
+
+  vim.keymap.set('n', 'q', function()
+    M.close()
+  end, opts)
+
+  vim.keymap.set('n', '<Esc>', function()
+    M.close()
+  end, opts)
+end
+
+function M.close()
+  if state.buffer and vim.api.nvim_buf_is_valid(state.buffer) then
+    vim.api.nvim_buf_delete(state.buffer, { force = true })
+  end
+  state.buffer = nil
+  state.window = nil
+end
+
+function M.setup(opts)
+  opts = opts or {}
 end
 
 return M

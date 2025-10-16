@@ -1,0 +1,7 @@
+if exists('g:loaded_dirquest')
+  finish
+endif
+let g:loaded_dirquest = 1
+
+command! -nargs=0 DirQuest lua require('dirquest').start()
+command! -nargs=0 DirQuestQuit lua require('dirquest').close()
