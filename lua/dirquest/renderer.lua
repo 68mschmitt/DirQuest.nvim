@@ -43,6 +43,11 @@ function M.render_world(buffer)
     end
   end
   
+  local scroll_offset = 0
+  if px > width - 20 then
+    scroll_offset = px - (width - 20)
+  end
+  
   local lines = {}
   table.insert(lines, "")
   table.insert(lines, "  📁 " .. game.state.current_dir)
@@ -50,8 +55,13 @@ function M.render_world(buffer)
   
   for y = 1, M.current_world.height do
     local line = ""
-    for x = 1, M.current_world.width do
-      line = line .. (M.current_world.grid[y][x] or " ")
+    for x = 1, width do
+      local world_x = x + scroll_offset
+      if world_x > 0 and world_x <= M.current_world.width then
+        line = line .. (M.current_world.grid[y][world_x] or " ")
+      else
+        line = line .. " "
+      end
     end
     table.insert(lines, line)
   end

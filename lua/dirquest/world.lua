@@ -4,18 +4,26 @@ local ascii_art = require('dirquest.ascii_art')
 local game = require('dirquest.game')
 
 function M.generate_world(width, height)
+  local total_dirs = 0
+  if game.state.items and game.state.items.directories then
+    total_dirs = #game.state.items.directories
+  end
+  
+  local min_world_width = math.max(width, total_dirs * 30)
+  
   local world = {
-    width = width,
+    width = min_world_width,
     height = height,
     grid = {},
     locations = {},
     objects = {},
-    ground_level = height - 5
+    ground_level = height - 5,
+    view_width = width
   }
   
   for y = 1, height do
     world.grid[y] = {}
-    for x = 1, width do
+    for x = 1, min_world_width do
       world.grid[y][x] = " "
     end
   end
