@@ -70,12 +70,12 @@ lua/dirquest/renderer.lua
 4. **Expected**: New buffer opens without errors
 
 ### Success Criteria
-- [ ] Plugin loads without errors
-- [ ] `:DirQuest` command is available
-- [ ] Buffer opens with correct configuration
-- [ ] Text can be rendered to buffer
-- [ ] Quit keymaps work correctly
-- [ ] No buffer leaks (check with `:ls!`)
+- [x] Plugin loads without errors
+- [x] `:DirQuest` command is available
+- [x] Buffer opens with correct configuration
+- [x] Text can be rendered to buffer
+- [x] Quit keymaps work correctly
+- [x] No buffer leaks (check with `:ls!`)
 
 ---
 
@@ -148,12 +148,12 @@ lua/dirquest/init.lua (modify)
 2. **Expected**: Error message or fallback to current directory
 
 ### Success Criteria
-- [ ] Current directory path is displayed
-- [ ] All files and directories are listed correctly
-- [ ] Can distinguish between files and directories
-- [ ] Can navigate into subdirectories
-- [ ] Empty directories handled gracefully
-- [ ] Invalid paths handled without crashes
+- [x] Current directory path is displayed
+- [x] All files and directories are listed correctly
+- [x] Can distinguish between files and directories
+- [x] Can navigate into subdirectories
+- [x] Empty directories handled gracefully
+- [x] Invalid paths handled without crashes
 
 ---
 
