@@ -4,7 +4,7 @@ local renderer = require('dirquest.renderer')
 local game = require('dirquest.game')
 local player = require('dirquest.player')
 
-M.version = "0.3.0"
+M.version = "0.4.0"
 
 function M.start(path)
   if game.state.buffer and vim.api.nvim_buf_is_valid(game.state.buffer) then
@@ -63,20 +63,17 @@ function M.setup_keymaps(buffer)
   end, opts)
 
   vim.keymap.set('n', '<CR>', function()
-    local cursor = vim.api.nvim_win_get_cursor(0)
-    local line = cursor[1]
+    local px, py = player.get_position()
     
-    local header_offset = 3
-    local item_line = line - header_offset
-    
-    if item_line > 0 then
-      local item = game.get_item_at_line(item_line)
-      if item then
-        if item.is_directory then
-          game.navigate_into(item)
+    if renderer.current_world then
+      local obj = require('dirquest.world').get_object_at(renderer.current_world, px, py)
+      if obj then
+        if obj.is_directory then
+          game.navigate_into(obj)
+          player.set_position(5, 5)
           renderer.render_world(game.state.buffer)
         else
-          game.navigate_into(item)
+          require('dirquest.filesystem').open_file(obj.path)
         end
       end
     end

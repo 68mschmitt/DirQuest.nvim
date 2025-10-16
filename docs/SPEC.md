@@ -242,11 +242,11 @@ lua/dirquest/renderer.lua (modify)
 3. **Expected**: Player moves in diagonal pattern smoothly
 
 ### Success Criteria
-- [ ] Player sprite renders correctly
-- [ ] All four directions (hjkl) work
-- [ ] Player cannot move outside buffer boundaries
-- [ ] No visual artifacts or duplicate sprites
-- [ ] Movement feels responsive
+- [x] Player sprite renders correctly
+- [x] All four directions (hjkl) work
+- [x] Player cannot move outside buffer boundaries
+- [x] No visual artifacts or duplicate sprites
+- [x] Movement feels responsive
 
 ---
 

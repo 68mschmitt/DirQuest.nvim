@@ -87,13 +87,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 2D character grid rendering system
 - Player drawn on top of world grid
 
+## [0.4.0] - 2025-10-16
+
+### Added
+- Phase 4 implementation - Simple World Generation
+- `ascii_art.lua` module with directory art templates
+- `world.lua` module for world generation and layout
+- Three sizes of directory ASCII art (small, medium, large)
+- Ground/floor rendering with equals signs
+- Horizontal layout of directory structures
+- File sprites with type-based icons ([L], [T], [M], [F])
+- Directory art scaled based on content size
+- Text embedding in ASCII art structures
+- Object detection at player position
+- Interaction system for world objects
+- 2D coordinate system for object placement
+
+### Changed
+- Updated `renderer.lua` to use world generation
+- Updated `init.lua` to handle world object interaction
+- Version bumped to 0.4.0
+- Player now interacts with visual objects in world
+- Enter key checks player position for nearby objects
+
+### Technical Details
+- `lua/dirquest/ascii_art.lua` - Art templates and generation
+- `lua/dirquest/world.lua` - World layout and object placement
+- Three directory templates based on size
+- Files limited to 10 visible at once
+- Objects positioned with spacing to avoid overlap
+
 ## [Unreleased]
 
-### Phase 4 - Coming Next
-- Simple ASCII art for directories
-- Ground/floor rendering
-- 2D coordinate system for world layout
-- Scrollable world
+### Phase 5 - Coming Next
+- Collision detection with directory structures
+- Entrance/door system for directories
+- Proper hitboxes for objects
+- Walk-through vs solid objects
 
 ### Future Phases
 - Player sprite and movement (Phase 3)

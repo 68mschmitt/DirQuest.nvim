@@ -10,7 +10,7 @@ Transform your file system navigation into an open-world side-scroller adventure
 - **Pure Lua**: 100% Lua implementation with zero external dependencies
 - **Lightweight**: Fast and efficient, designed for Neovim
 
-## 🚀 Current Status: Phase 3 (v0.3.0)
+## 🚀 Current Status: Phase 4 (v0.4.0)
 
 DirQuest is under active development. Currently implemented:
 - ✅ Basic buffer and plugin infrastructure
@@ -23,11 +23,15 @@ DirQuest is under active development. Currently implemented:
 - ✅ Player sprite and movement (hjkl)
 - ✅ 2D world view with player
 - ✅ Boundary checking
+- ✅ ASCII art world generation
+- ✅ Directory structures as boxes
+- ✅ Ground/floor rendering
+- ✅ File sprites
 
 Coming soon:
-- 🏰 ASCII art world generation
-- 🎯 Collision detection and interaction
+- 🎯 Collision detection with structures
 - 🎨 Visual polish and customization
+- 🏰 Enhanced ASCII art variety
 
 ## 📦 Installation
 
@@ -118,11 +122,12 @@ require('dirquest').setup({
 - Basic boundary checking
 - 2D world view
 
-### Phase 4: Simple World Generation
+### Phase 4: Simple World Generation ✅
 - 2D coordinate system for world layout
 - Simple ASCII art for directories
 - Ground/floor rendering
-- Scrollable world
+- Directory structures positioned horizontally
+- File sprites with type indicators
 
 ### Phase 5: Collision Detection and Interaction
 - Collision detection with directory structures
